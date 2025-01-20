@@ -58,7 +58,15 @@ class _LoginScreenState extends State<LoginScreen> {
         // Parse response and navigate on success
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
-          Navigator.pushNamed(context, '/home'); // Replace with your route
+          if (data['type'] == 'admin') {
+            Navigator.pushNamed(context, '/admin');
+          }
+          else if (data['type'] == 'employee') {
+            Navigator.pushNamed(context, '/employee');
+          }
+          else {
+            Navigator.pushNamed(context, '/home');
+          }
         } else {
           _showSnackBar(context, data['message'] ?? "Login failed");
         }

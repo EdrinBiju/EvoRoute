@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pymongo
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -34,7 +35,7 @@ def login():
    
    user = clean_user_data(user)
 
-   return jsonify({'data': user, 'success': True}), 200
+   return jsonify({'type': user['type'], 'success': True}), 200
 
 @app.route('/register', methods = ['POST'])
 def register():
@@ -56,5 +57,77 @@ def register():
 
    return "Account created", 200
 
+@app.route('/addbus', methods=['POST'])
+def add_bus():
+   # Get data from the request
+   payload = request.get_json()
+
+   # Validate incoming data
+   required_fields = ['starting_location', 'destination_location', 'stop_locations', 'start_time', 'bus_type']
+   for field in required_fields:
+      if field not in payload:
+         return jsonify({'error': f'{field} is required'}), 400
+
+   # Prepare the data for insertion
+   bus_data = {
+      "starting_location": payload["starting_location"],
+      "destination_location": payload["destination_location"],
+      "stop_locations": payload["stop_locations"],
+      "start_time": datetime.strptime(payload["start_time"], "%I:%M %p"),  # Convert to datetime object
+      "bus_type": payload["bus_type"]
+   }
+
+   # Insert data into the database
+   try:
+      result = evodb.bus.insert_one(bus_data)
+      return jsonify({"message": "Bus added successfully", "bus_id": str(result.inserted_id)}), 201
+   except Exception as e:
+      return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+@app.route('/findbus', methods=['POST'])
+def find_bus():
+   data = request.get_json()
+   
+   start_location = data.get('startLocation')
+   destination_location = data.get('destinationLocation')
+   bus_types = data.get('busTypes', [])
+   
+   if not start_location or not destination_location or not bus_types:
+      return jsonify({'error': 'Missing required fields'}), 400
+
+   # Query buses
+   buses = list(evodb.bus.find({
+      "$and": [
+         # Ensure start_location is in starting_location or stop_locations
+         {"$or": [
+               {"starting_location": start_location},
+               {"stop_locations": start_location}
+         ]},
+         # Ensure destination_location is in destination_location or stop_locations
+         {"$or": [
+               {"destination_location": destination_location},
+               {"stop_locations": destination_location}
+         ]},
+         # Filter by bus types
+         {"bus_type": {"$in": bus_types}}
+      ]
+   }))
+
+   filtered_buses = []
+
+   for bus in buses:
+      if start_location in bus['stop_locations'] and destination_location in bus['stop_locations']:
+         if bus['stop_locations'].index(start_location) >= bus['stop_locations'].index(destination_location):
+            continue
+         else:
+            filtered_buses.append(bus)
+      else:
+            filtered_buses.append(bus)
+   # Prepare response
+   for bus in buses:
+      bus['_id'] = str(bus['_id'])  # Convert ObjectId to string for JSON serialization
+
+   return jsonify({'buses': filtered_buses}) ,200
+    
 if __name__ == '__main__':
    app.run(debug=True, use_reloader=True)
