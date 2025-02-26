@@ -4,6 +4,7 @@ import 'package:frontend/core/theme/app_pallete.dart';
 import 'package:frontend/core/theme/theme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:frontend/core/constants/constant.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,9 +14,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<String> locations = ['Aanakkampoyil', 'Angamaly', 'Areekode', 'Bharananganam', 'Chalakudy', 'Elappara', 'Erattupetta', 'Kattappana', 'Koothattukulam', 'Kunnamkulam', 'Manjeri', 'Mukkam', 'Muvattupuzha', 'Pala', 'Pattambi', 'Peramangalam', 'Perinthalmanna', 'Perumbavoor', 'Puthukad', 'Thiruvambady', 'Thrissur', 'Vagamon', 'Adimali', 'Adoor', 'Alappuzha', 'Aluva', 'Anachal', 'Attingal', 'Ayoor', 'Bangalore', 'Chadayamangalam', 'Changanassery', 'Changaramkulam ', 'Chengannur', 'Cherthala', 'Chinnar ', 'Edappal', 'Ernakulam', 'Ettumanoor', 'Haripad', 'Kallar', 'Kalpetta', 'Kannur', 'Kanthalloor', 'Karunagappalli', 'Kayamkulam', 'Kilimanoor', 'Kollam', 'Kothamangalam', 'Kottakkal', 'Kottarakkara', 'Kottayam', 'Koyilandy', 'Kozhikode', 'Kozhikode University', 'Kudiyanmala', 'Kuravilangad', 'Kuttipuram', 'Marayoor', 'Mavelikara', 'Munnar', 'Mysore', 'Neyyattinkara', 'Palakkayam Thattu', 'Palani', 'Pandalam', 'Sultan Bathery', 'Taliparamba', 'Thalassery', 'Thamarassery', 'Thiruvalla', 'Thodupuzha', 'Trivandrum', 'Udumalaipettai', 'Vadakara', 'Valanchery ', 'Vattappara', 'Venjarammoodu', 'Vytilla Hub', 'Adivaram', 'Ambalapuzha', 'Anchal', 'Chathannoor', 'Erumeli', 'Guruvayoor', 'Kakkad', 'Kanjirappally', 'Kodungallur', 'Konni', 'Kozhenchery', 'Kulathupuzha', 'Madathara', 'Mananthavady', 'Mannarkkad', 'Meenangadi', 'Nedumangad', 'Padinjarathara', 'Palakkad', 'Palode', 'Paravoor North', 'Pathanamthitta', 'Pathanapuram', 'Peroorkada', 'Punalur', 'Ranny', 'Shoranur', 'Thenmala', 'Triprayar', 'Vadanappally', 'Vythiri', 'Wadakkanchery', 'Alakode', 'Alathur', 'Alur', 'Amrita Hospital', 'Aryanad', 'Atholy', 'Charummood', 'Cheruthoni', 'Chettikulangara ', 'Chingavanam', 'Chittoor', 'Choondal', 'Cochin University', 'Coimbatore', 'Edappally', 'Eramalloor', 'Gudalur', 'Idukki', 'Irinjalakuda', 'Kaduthuruthy', 'Kalavoor', 'Kaliyakkavilai', 'Kanhangad', 'Kanyakumari', 'Kasargode', 'Kattakada', 'Kazhakkoottam', 'Kollur', 'kottiyam', 'Kulamavu', 'Kumily', 'Kundara', 'Kuttikkanam', 'Kuttiyadi', 'Kuzhalmannam', 'Mangalore', 'Mannuthy', 'Moolamattom', 'Mundakkayam', 'Nadathara', 'Naduvattam', 'Nagercoil', 'Nedumbassery South', 'Nedumkandam', 'Nilakkal', 'Nilambur', 'Nilamel', 'Ooty', 'Painavu', 'Pamba', 'Panamaram', 'Panjikkal', 'Pappanamcode', 'Parassala', 'Paravur', 'Pattikkad', 'Payyanur', 'Peerumedu', 'Perambra', 'Perikkalloor', 'Piravom', 'Ponkunnam', 'Ponnani', 'Pulpally ', 'Salem', 'Senkottai', 'Shenkottai', 'Sullia', 'Thenkasi', 'Thottilpalam', 'Thrippunithura', 'Tirunelveli', 'Tirur', 'Udayagiri', 'Udupi', 'Vadakkencherry', 'Vadaserikara ', 'Vaikom', 'Valakom', 'Vandiperiyar', 'Vannappuram', 'Vembayam', 'Agali', 'Anaikatti', 'Bandhaduka', 'Cherupuzha', 'Chittarikkal ', 'Konnakad', 'Odayanchal', 'Panathur', 'Poovam', 'Rajapuram', 'Vellarikundu ', 'Annamanada', 'Attukal', 'Balaramapuram', 'Edathva ', 'Hosur', 'Kadalundi Kadavu', 'Kalamassery', 'Kaniyapuram', 'Mala', 'Malappuram', 'Nedumbassery', 'Niravilpuzha', 'Ottapalam', 'Parappanangadi', 'Pathirippalla', 'Pengamuck', 'Pollachi', 'Poovar', 'Seetha Mount', 'Tanur', 'Thiruvilwamala', 'Varapuzha', 'Vellamunda', 'Vellanad', 'Vizhinjam', 'Mallappally', 'Palakkayam ', 'Tiruppur', 'Azhakiyakavu', 'chavakkad', 'Chelachuvadu', 'cherthala bypass', 'Cumbum', 'Kunnamangalam', 'Mankada', 'Mankamkuzhy', 'Nenmara', 'Neriamangalam', 'Nirmala City', 'Pulamanthole', 'Ramanattukara', 'Aster Medcity', 'Manimala', 'Nedumudy', 'Karette', 'Marthandam', 'Thuckalay', 'Andipatti', 'Madurai', 'Theni', 'Usilampatti', 'Chengalpattu', 'Chennai', 'Iritty', 'Kuthuparamba', 'Mattannur', 'Nadavayal', 'Padichira', 'Pampady', 'Payyavoor', 'Puthunagaram', 'Thalayolaparambu', 'Thanjavur', 'Thavalam', 'Thirunelly', 'Tindivanam', 'Trichy', 'Ulliyeri', 'Velankanni', 'Villupuram', 'Wandoor', 'Arookutty', 'Arthunkal', 'Chellanam', 'Cherai', 'Kangayam', 'Kannamaly', 'Karur', 'Njarackal', 'Athankarai Mosque', 'Koodankulam', 'Athur', 'Cuddalore', 'Karipur', 'Mahe', 'Neyveli', 'Pondicherry', 'Dindigul', 'Gundlupete', 'Mandya', 'Mercara', 'Nadapuram', 'Virajpet', 'Kurinji', 'Vettikavala', 'Thaloor', 'Vazhikkadavu', 'Chandanakampara', 'Sreekandapuram', 'Veliyanad', 'Parippally', 'Chennad', 'Cherambadi', 'Choladi BS', 'Mettupalayam', 'Chullimanoor', 'Kottavasal', 'Coonoor', 'Ukkadam', 'Walayar', 'East Fort City Ride', 'East Fort', 'Karukachal', 'Puthuppally', 'Kaipally', 'Kundapura', 'Karavaloor', 'Vithura', 'Kattikkulam', 'Rajapalayam', 'Kunnonni', 'Munambam', 'Nanjangode', 'Pallickathodu', 'Vellarada', 'Poochakkal', 'Purapuzha', 'Technopark'];
   
-  final List<String> busTypes = ['Ordinary', 'Fast', 'Super Fast', 'Swift'];
+  List<String> locations = [];
+  List<String> busTypes = [];
+
+  bool _isLoadingLocations = true; // For showing a loader if needed
+  bool _isLoadingBusTypes = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocations(); // Fetch locations from API
+    _fetchBusTypes();
+  }
 
   String? selectedStartLocation;
   String? selectedDestinationLocation;
@@ -25,6 +36,78 @@ class _HomePageState extends State<HomePage> {
     'Super Fast': false,
     'Swift': false,
   };
+
+  // Fetch locations from API
+  Future<void> _fetchLocations() async {
+    try {
+      final response = await http.get(Uri.parse('http://$IP:$PORT/locations'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body); 
+        // Assuming the response is something like ["Aanakkampoyil", "Angamaly", ...]
+        if (data is List) {
+          setState(() {
+            locations = data.map((e) => e.toString()).toList();
+            _isLoadingLocations = false;
+          });
+        } else {
+          // Handle unexpected response structure
+          setState(() {
+            _isLoadingLocations = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Invalid response from server')),
+          );
+        }
+      } else {
+        // Handle non-200 response
+        setState(() {
+          _isLoadingLocations = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load locations')),
+        );
+      }
+    } catch (e) {
+      // Handle exception
+      setState(() {
+        _isLoadingLocations = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching locations: $e')),
+      );
+    }
+  }
+
+  // Fetch bus types from API
+  Future<void> _fetchBusTypes() async {
+    try {
+      final response = await http.get(Uri.parse('http://$IP:$PORT/bus_types'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List) {
+          setState(() {
+            busTypes = data.map((e) => e.toString()).toList();
+            _isLoadingBusTypes = false;
+          });
+        } else {
+          setState(() => _isLoadingBusTypes = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Invalid response for bus types')),
+          );
+        }
+      } else {
+        setState(() => _isLoadingBusTypes = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load bus types')),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoadingBusTypes = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching bus types: $e')),
+      );
+    }
+  }
 
   void _searchBuses() async {
     if (selectedStartLocation == null || selectedDestinationLocation == null) {
@@ -64,7 +147,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // Send POST request to Flask API
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/findbus'),
+        Uri.parse('http://$IP:$PORT/findbus'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(data),
       );
@@ -144,91 +227,93 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Find Your Bus',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            
-           ListTile(
-              title: Text(
-                selectedStartLocation ?? 'Select Starting Location',  // Default text when no location is selected
-                style: const TextStyle(color: Colors.white),
-              ),
-              trailing: Icon(Icons.search, color: Colors.white),
-              onTap: () => _selectLocation('start'),  // Trigger selection for starting location
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: AppPallete.gradient2, width: 1.0),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Destination Location Search Button
-            ListTile(
-              title: Text(
-                selectedDestinationLocation ?? 'Select Destination Location',  // Default text when no location is selected
-                style: const TextStyle(color: Colors.white),
-              ),
-              trailing: Icon(Icons.search, color: Colors.white),
-              onTap: () => _selectLocation('destination'),  // Trigger selection for destination location
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: AppPallete.gradient2, width: 1.0),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Bus Types Checkboxes
-            const Text(
-              'Select Bus Types:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Column(
-              children: busTypes.map((busType) {
-                return CheckboxListTile(
-                  title: Text(busType),
-                  value: selectedBusTypes[busType] ?? false, // Ensure value is never null
-                  onChanged: (value) {
-                    setState(() {
-                      selectedBusTypes[busType] = value ?? false; // Use false as the default value
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-            const Spacer(),
-            
-            // Search Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
-                  backgroundColor: AppPallete.gradient1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+        child: _isLoadingLocations || _isLoadingBusTypes
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Find Your Bus',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                onPressed: _searchBuses,
-                child: const Text(
-                  "Search",
-                  style: TextStyle(
-                    color: AppPallete.whiteColor,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 20),
+                  
+                ListTile(
+                    title: Text(
+                      selectedStartLocation ?? 'Select Starting Location',  // Default text when no location is selected
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    trailing: Icon(Icons.search, color: Colors.white),
+                    onTap: () => _selectLocation('start'),  // Trigger selection for starting location
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: AppPallete.gradient2, width: 1.0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+
+                  // Destination Location Search Button
+                  ListTile(
+                    title: Text(
+                      selectedDestinationLocation ?? 'Select Destination Location',  // Default text when no location is selected
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    trailing: Icon(Icons.search, color: Colors.white),
+                    onTap: () => _selectLocation('destination'),  // Trigger selection for destination location
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: AppPallete.gradient2, width: 1.0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Bus Types Checkboxes
+                  const Text(
+                    'Select Bus Types:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Column(
+                    children: busTypes.map((busType) {
+                      return CheckboxListTile(
+                        title: Text(busType),
+                        value: selectedBusTypes[busType] ?? false, // Ensure value is never null
+                        onChanged: (value) {
+                          setState(() {
+                            selectedBusTypes[busType] = value ?? false; // Use false as the default value
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const Spacer(),
+                  
+                  // Search Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        backgroundColor: AppPallete.gradient1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: _searchBuses,
+                      child: const Text(
+                        "Search",
+                        style: TextStyle(
+                          color: AppPallete.whiteColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
       ),
     );
   }

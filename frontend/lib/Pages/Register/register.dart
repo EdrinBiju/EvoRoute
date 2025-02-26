@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:frontend/components/obscure_textformfield.dart';
 import 'package:frontend/components/my_textform_field.dart';
 import 'package:frontend/components/my_button_new.dart';
+import 'package:frontend/core/constants/constant.dart';
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
@@ -14,7 +15,7 @@ class RegisterScreen extends StatelessWidget {
   final GlobalKey<FormState> formKey2 = GlobalKey<FormState>();
 
   Future<void> registerFunc(BuildContext context) async {
-    const String apiUrl = "http://127.0.0.1:5000/register"; // Replace with your API URL
+    const String apiUrl = "http://$IP:$PORT/register"; // Replace with your API URL
 
     // Show loading indicator
     showDialog(

@@ -10,6 +10,7 @@ CORS(app)
 app.config['DEBUG'] = True
 
 mongo = pymongo.MongoClient("mongodb+srv://testofunknown:Abc123@evoroute-database.m2aiy.mongodb.net/?retryWrites=true&w=majority&appName=evoroute-database")
+# mongo = pymongo.MongoClient("mongodb://localhost:27017/evoroute")
 evodb = mongo.evoroute
 
 def clean_user_data(user):
@@ -70,16 +71,19 @@ def add_bus():
 
    # Prepare the data for insertion
    bus_data = {
+      "bus_no": payload["bus_number"],
       "starting_location": payload["starting_location"],
       "destination_location": payload["destination_location"],
       "stop_locations": payload["stop_locations"],
-      "start_time": datetime.strptime(payload["start_time"], "%I:%M %p"),  # Convert to datetime object
+      "stop_kms": payload["stop_kms"],
+      "start_time": datetime.strptime(payload["start_time"], "%I:%M %p"),
+      "reach_time": datetime.strptime(payload["start_time"], "%I:%M %p"),
       "bus_type": payload["bus_type"]
    }
 
    # Insert data into the database
    try:
-      result = evodb.bus.insert_one(bus_data)
+      result = evodb.bus_routes.insert_one(bus_data)
       return jsonify({"message": "Bus added successfully", "bus_id": str(result.inserted_id)}), 201
    except Exception as e:
       return jsonify({"error": f"An error occurred: {str(e)}"}), 500
@@ -96,7 +100,7 @@ def find_bus():
       return jsonify({'error': 'Missing required fields'}), 400
 
    # Query buses
-   buses = list(evodb.bus.find({
+   buses = list(evodb.bus_routes.find({ 
       "$and": [
          # Ensure start_location is in starting_location or stop_locations
          {"$or": [
@@ -128,6 +132,22 @@ def find_bus():
       bus['_id'] = str(bus['_id'])  # Convert ObjectId to string for JSON serialization
 
    return jsonify({'buses': filtered_buses}) ,200
-    
+
+@app.route('/locations',methods=['GET'])
+def get_locations(): 
+   locations = list(evodb.locations.find({}, {"_id": 0, "name": 1}))  # Exclude _id from results
+   location_list = [location["name"] for location in locations]  # Extract names
+   return jsonify(location_list)
+
+@app.route('/bus_types',methods=['GET'])
+def get_types(): 
+   bus_types = list(evodb.bus_types.find({}, {"_id": 0, "bus_type": 1}))  # Exclude _id from results
+   bus_types_list = [bus_type["bus_type"] for bus_type in bus_types]  # Extract names
+   return jsonify(bus_types_list)
+
+@app.route('/allbuses',methods=['POST'])
+def all_busses(): 
+   pass
+
 if __name__ == '__main__':
-   app.run(debug=True, use_reloader=True)
+   app.run(debug=True, use_reloader=True) 
