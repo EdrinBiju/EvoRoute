@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/Pages/Admin/admin.dart';
 import 'package:frontend/Pages/Employee/addbus.dart';
 import 'package:frontend/Pages/Employee/employee.dart';
+import 'package:frontend/Pages/Login/forgot_password.dart';
 import 'package:frontend/Pages/Login/login.dart';
 import 'package:frontend/Pages/Register/register.dart';
 import 'package:frontend/Pages/Users/Home/home.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/admin': (context) => AdminPage(),
         '/employee': (context) => EmployeePage(),
-        '/addBus': (context) => AddBusPage()
+        '/addBus': (context) => AddBusPage(),
+        '/forgot_password': (context) => ForgotPasswordPage(),
       },
     );
   }

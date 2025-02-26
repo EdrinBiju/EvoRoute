@@ -3,11 +3,7 @@ import 'package:frontend/core/theme/theme.dart';
 import 'package:frontend/components/obscure_textformfield.dart';
 import 'package:frontend/components/my_textform_field.dart';
 import 'package:frontend/components/my_button_new.dart';
-// import 'package:frontend/components/square_tile.dart';
-// import 'package:frontend/Pages/Login/forgot_password.dart';
-// import 'package:frontend/core/theme/app_pallete.dart';
-// import 'package:frontend/core/theme/theme.dart';
-// import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:frontend/core/constants/constant.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -30,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login(BuildContext context) async {
-    const String apiUrl = "http://127.0.0.1:5000/login"; // Update with your local IP or emulator IP
+    const String apiUrl = "http://$IP:$PORT/login"; // Update with your local IP or emulator IP
 
     // Show loading indicator
     showDialog(
@@ -103,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void forgotPass() {
-    
+    Navigator.pushNamed(context, '/forgot_password');
   }
 
   @override
@@ -148,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 10),
                   const Text(
                     "EvoRoute",
-                    style: TextStyle(fontFamily: 'Courier New', fontSize: 42, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),//fontFamily: 'Courier New',
                   ),
                   const SizedBox(height: 15),
                   Form(
@@ -160,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: _validateUsername,
                           controller: username,
                           obscureText: false,
-                          iconName: "person_alt_circle_fill",
+                          iconName: "username",
                         ),
                         const SizedBox(height: 20),
                         ObsTextFormField(
@@ -211,14 +207,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account?"),
+                      const Text("   Don't have an account?"),
                       const SizedBox(width: 1),
                       TextButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/register');
                         },
                         child: Text(
-                          "Register Now! ",
+                          "Register Now!",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: isDarkMode

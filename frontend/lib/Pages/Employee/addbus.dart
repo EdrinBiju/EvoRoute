@@ -19,6 +19,7 @@ class _AddBusPageState extends State<AddBusPage> {
   final TextEditingController _busNumberController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _reachTimeController = TextEditingController();
+  final TextEditingController _destinationKMController = TextEditingController();
 
   String? startingLocation;
   String? destinationLocation;
@@ -28,9 +29,14 @@ class _AddBusPageState extends State<AddBusPage> {
 
   List<String> locations = [];
   List<String> busTypes = [];
+  List<String> selectedDays = [];
 
   bool _isLoadingLocations = true; // For showing a loader if needed
   bool _isLoadingBusTypes = true;
+
+  final List<String> allDays = [
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+  ];
 
   @override
   void initState() {
@@ -44,6 +50,7 @@ class _AddBusPageState extends State<AddBusPage> {
     _busNumberController.dispose();
     _startTimeController.dispose();
     _reachTimeController.dispose();
+    _destinationKMController.dispose();
     super.dispose();
   }
 
@@ -102,7 +109,7 @@ class _AddBusPageState extends State<AddBusPage> {
         } else {
           setState(() => _isLoadingBusTypes = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Invalid response for bus types')),
+            SnackBar(content: Text('Invalid response from server')),
           );
         }
       } else {
@@ -131,8 +138,9 @@ class _AddBusPageState extends State<AddBusPage> {
         stopKMs.isEmpty ||
         stopKMs.any((km) => km.isEmpty) ||
         _startTimeController.text.isEmpty ||
-        _reachTimeController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+        _reachTimeController.text.isEmpty ||
+        selectedDays.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill all required fields and select all locations'))
       );
       return;
@@ -147,11 +155,13 @@ class _AddBusPageState extends State<AddBusPage> {
         'bus_number': _busNumberController.text,
         'starting_location': startingLocation,
         'destination_location': destinationLocation,
+        'destination_km': _destinationKMController.text,
         'bus_type': selectedBusType,
         'stop_locations': stopLocations,
         'stop_kms': stopKMs,
         'start_time': _startTimeController.text,
         'reach_time': _reachTimeController.text,
+        'days': selectedDays,
       }),
     );
 
@@ -302,6 +312,50 @@ class _AddBusPageState extends State<AddBusPage> {
                         return null;
                       },
                     ),
+
+                    SizedBox(height: 16),
+
+                    // Days of the Week Selection (Trip Days)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Select Trip Days', style: AppPallete.whiteText),
+                        SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: allDays.map((day) {
+                            final isSelected = selectedDays.contains(day);
+                            return ChoiceChip(
+                              label: Text(day,
+                                  style: TextStyle(
+                                      color: isSelected ? Colors.black : Colors.white)),
+                              selected: isSelected,
+                              selectedColor: AppPallete.gradient3,
+                              backgroundColor: AppPallete.gradient2,
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    selectedDays.add(day);
+                                  } else {
+                                    selectedDays.remove(day);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        if (selectedDays.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Please select at least one day',
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                          ),
+                      ],
+                    ),
+
                     SizedBox(height: 16),
 
                     // Stop locations list with KM field and delete button
@@ -358,13 +412,14 @@ class _AddBusPageState extends State<AddBusPage> {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
                                     onChanged: (value) {
                                       stopKMs[index] = value;
                                     },
                                     validator: (value) {
                                       if (value == null || value.isEmpty) return 'Enter KM';
-                                      if (int.tryParse(value) == null) return 'Enter a valid number';
+                                      if (double.tryParse(value) == null) return 'Enter a valid number';
+                                      if (double.parse(value) <= 0) return 'Enter a positive number';
                                       return null;
                                     },
                                   ),
@@ -385,7 +440,7 @@ class _AddBusPageState extends State<AddBusPage> {
                           onTap: _addStop,
                           child: Container(
                             width: double.infinity,
-                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            padding: EdgeInsets.symmetric(vertical: 8.0),
                             decoration: BoxDecoration(
                               color: AppPallete.gradient2,
                               borderRadius: BorderRadius.circular(10),
@@ -402,26 +457,61 @@ class _AddBusPageState extends State<AddBusPage> {
                     ),
                     SizedBox(height: 16),
 
-                    // Destination location searchable dropdown
-                    ListTile(
-                      title: Text(destinationLocation ?? 'Select Destination Location', style: AppPallete.whiteText),
-                      trailing: Icon(Icons.search, color: AppPallete.whiteColor),
-                      onTap: () async {
-                        final selected = await showSearch<String>(
-                          context: context,
-                          delegate: LocationSearchDelegate(locations),
-                        );
-                        if (selected != null && selected != '') {
-                          setState(() {
-                            destinationLocation = selected;
-                          });
-                        }
-                      },
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: AppPallete.gradient2, width: 1.0),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 3, // Adjusting width for destination field
+                          child: ListTile(
+                            title: Text(destinationLocation ?? 'Select Destination Location', style: AppPallete.whiteText),
+                            trailing: Icon(Icons.search, color: AppPallete.whiteColor),
+                            onTap: () async {
+                              final selected = await showSearch<String>(
+                                context: context,
+                                delegate: LocationSearchDelegate(locations),
+                              );
+                              if (selected != null && selected != '') {
+                                setState(() {
+                                  destinationLocation = selected;
+                                });
+                              }
+                            },
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(color: AppPallete.gradient2, width: 1.0),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8), // Space between fields
+                        Container(
+                          width: 62, // Fixed width for KM field
+                          child: TextFormField(
+                            controller: _destinationKMController,
+                            style: AppPallete.whiteText,
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              labelText: 'KM',
+                              labelStyle: AppPallete.whiteText,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: AppPallete.gradient2, width: 1.0),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: AppPallete.gradient3, width: 2.0),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            keyboardType: TextInputType.numberWithOptions(decimal: true),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Enter KM';
+                              if (double.tryParse(value) == null) return 'Enter a valid number';
+                              if (double.parse(value) <= 0) return 'Enter a positive number';
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
                     ),
+
                     SizedBox(height: 16),
                     
                     // Start Time and Reach Time in one row
@@ -582,22 +672,40 @@ class _AddBusPageState extends State<AddBusPage> {
                     ),
                     SizedBox(height: 16),
 
-                    // Add Bus Button
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          _addBus();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppPallete.gradient3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.darkThemeGradient,
+                        // gradient: LinearGradient(
+                        //   colors: [Color(0xFFBB86FC), Color(0xFF3700B3)],
+                        //   begin: Alignment.topLeft,
+                        //   end: Alignment.bottomRight,
+                        // ),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Text('Add Bus', style: AppPallete.whiteText),
-                    ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            _addBus();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 15.0),
+                        ),
+                        child: Text(
+                          'Add Bus Route',
+                          style: AppPallete.whiteText.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ),

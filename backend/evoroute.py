@@ -1,13 +1,27 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pymongo
-from datetime import datetime
+from datetime import datetime, date, timedelta, timezone
+import pytz
+import random
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from flask import render_template
 
 app = Flask(__name__)
 
 CORS(app)
 
 app.config['DEBUG'] = True
+
+ist = pytz.timezone("Asia/Kolkata")
+
+# Email Configuration
+SMTP_SERVER = "smtp.gmail.com" 
+SMTP_PORT = 587
+EMAIL_SENDER = "evoroutebot@gmail.com"
+EMAIL_PASSWORD = "huwj uvaz dmqk ehmz"
 
 mongo = pymongo.MongoClient("mongodb+srv://testofunknown:Abc123@evoroute-database.m2aiy.mongodb.net/?retryWrites=true&w=majority&appName=evoroute-database")
 # mongo = pymongo.MongoClient("mongodb://localhost:27017/evoroute")
@@ -17,6 +31,39 @@ def clean_user_data(user):
     user['_id'] = str(user['_id'])
     return user
 
+# Function to send OTP via email and save it in the database
+def send_email(username, email):
+    otp = str(random.randint(100000, 999999))  # Generate OTP
+    expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
+
+    # Save OTP in the database
+    evodb.otps.update_one(
+        {"username": username},
+        {"$set": {"otp": otp, "email": email, "expires_at": expiration_time}},
+        upsert=True
+    )
+
+    with app.app_context():  # Push the application context
+        subject = "Email Verification"
+        body = render_template('email_template.html', otp=otp)  # Load HTML template
+
+        msg = MIMEMultipart()
+    msg["From"] = EMAIL_SENDER
+    msg["To"] = email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "html"))
+
+    try:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(EMAIL_SENDER, EMAIL_PASSWORD)  # Use App Password here
+        server.sendmail(EMAIL_SENDER, email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        print(f"Failed to send email to {email}: {e}")
+        return False
+    
 @app.route('/')
 def check_connection():
    if mongo:
@@ -38,25 +85,112 @@ def login():
 
    return jsonify({'type': user['type'], 'success': True}), 200
 
-@app.route('/register', methods = ['POST'])
+# API to send OTP (for registration and forgot password)
+@app.route('/send-otp', methods=['POST'])
+def send_otp():
+    data = request.get_json()
+    username = data.get("username")
+    email = data.get("email")
+
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
+
+    user = evodb.user.find_one({"username": username})
+
+    # Registration case: Ensure username and email are unique
+    if email:
+        if user:
+            return jsonify({"error": "Username already exists"}), 400
+        existing_email = evodb.user.find_one({"email": email})
+        if existing_email:
+            return jsonify({"error": "Email already registered"}), 400
+    else:
+        # Forgot password case: Ensure username exists
+        if not user:
+            return jsonify({"error": "Username not found"}), 404
+        email = user["email"]  # Use the email associated with the username
+
+    if send_email(username, email):
+        return jsonify({"message": "OTP sent successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to send OTP"}), 500
+
+# API to verify OTP
+@app.route('/verify-otp', methods=['POST'])
+def verify_otp():
+    data = request.get_json()
+    username = data.get("username")
+    email = data.get("email")
+    otp = data.get("otp")
+
+    otp_record = evodb.otps.find_one({"username": username, "email": email})
+
+    if not otp_record:
+        return jsonify({"error": "Invalid request"}), 400
+
+    if str(otp_record["otp"]) != str(otp):
+        return jsonify({"error": "Invalid OTP"}), 400
+
+    if datetime.utcnow() > otp_record["expires_at"]:
+        return jsonify({"error": "OTP expired"}), 400
+
+    return jsonify({"message": "OTP verified successfully"}), 200
+
+# API to register user after OTP verification
+@app.route('/register', methods=['POST'])
 def register():
-   data = request.get_json()
-   username = data.get('username')
-   password = data.get('password')
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+    email = data.get("email")
 
-   check_user = evodb.user.find_one({'username' : username})
+    if not (username and password and email):
+        return jsonify({"error": "All fields are required"}), 400
 
-   if check_user:
-      return "username already exists", 401
-   
-   user = {
-       'username' : username,
-       'password' : password,
-       'type' : 'user'
-   }
-   insert = evodb.user.insert_one(user)
+    if evodb.user.find_one({"username": username}):
+        return jsonify({"error": "Username already exists"}), 400
 
-   return "Account created", 200
+    evodb.user.insert_one({
+        "username": username,
+        "password": password,
+        "email": email,
+        "type": "user"
+    })
+
+    return jsonify({"message": "Account created successfully"}), 200
+
+@app.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    username = data.get('username')
+
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
+
+    # Find user in database
+    user = evodb.user.find_one({"username": username})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    email = user.get("email")
+    
+    # Send OTP email
+    if send_email(username, email):
+        return jsonify({"message": "OTP sent successfully", "email": email}), 200
+    else:
+        return jsonify({"error": "Failed to send OTP"}), 500
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    username = data.get("username")
+    new_password = data.get("new_password")
+
+    if not (username and new_password):
+        return jsonify({"error": "Username and new password are required"}), 400
+
+    evodb.user.update_one({"username": username}, {"$set": {"password": new_password}})
+    return jsonify({"message": "Password reset successful"}), 200
 
 @app.route('/addbus', methods=['POST'])
 def add_bus():
@@ -74,11 +208,13 @@ def add_bus():
       "bus_no": payload["bus_number"],
       "starting_location": payload["starting_location"],
       "destination_location": payload["destination_location"],
+      "destination_km": payload["destination_km"],
       "stop_locations": payload["stop_locations"],
       "stop_kms": payload["stop_kms"],
-      "start_time": datetime.strptime(payload["start_time"], "%I:%M %p"),
-      "reach_time": datetime.strptime(payload["start_time"], "%I:%M %p"),
-      "bus_type": payload["bus_type"]
+      "start_time": ist.localize(datetime.combine(date.today(),datetime.strptime(payload["start_time"], "%I:%M %p").time())),
+      "reach_time": ist.localize(datetime.combine(date.today(),datetime.strptime(payload["reach_time"], "%I:%M %p").time())),
+      "bus_type": payload["bus_type"],
+      "days": payload["days"],
    }
 
    # Insert data into the database

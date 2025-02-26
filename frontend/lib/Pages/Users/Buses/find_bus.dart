@@ -12,7 +12,10 @@ class FindBusPage extends StatelessWidget {
     try {
       // Parse the incoming date string
       final parsedTime = DateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'").parse(rawTime, true);
-      return DateFormat('hh:mm a').format(parsedTime); // Format to hh:mm AM/PM
+      // Convert UTC to IST (UTC+5:30)
+      final istTime = parsedTime.add(Duration(hours: 5, minutes: 30));
+      // Format to hh:mm AM/PM
+      return DateFormat('hh:mm a').format(istTime);
     } catch (e) {
       return 'Invalid Time';
     }

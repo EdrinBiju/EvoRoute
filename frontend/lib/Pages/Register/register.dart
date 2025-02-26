@@ -5,19 +5,20 @@ import 'package:frontend/components/obscure_textformfield.dart';
 import 'package:frontend/components/my_textform_field.dart';
 import 'package:frontend/components/my_button_new.dart';
 import 'package:frontend/core/constants/constant.dart';
+import 'otp_verification.dart'; 
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
 
   final TextEditingController _userName_1 = TextEditingController();
+  final TextEditingController _email = TextEditingController();
   final TextEditingController _password_1 = TextEditingController();
   final TextEditingController _confirmPass = TextEditingController();
   final GlobalKey<FormState> formKey2 = GlobalKey<FormState>();
 
-  Future<void> registerFunc(BuildContext context) async {
-    const String apiUrl = "http://$IP:$PORT/register"; // Replace with your API URL
+  Future<void> _sendOtp(BuildContext context) async {
+    const String otpApiUrl = "http://$IP:$PORT/send-otp";
 
-    // Show loading indicator
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -26,29 +27,34 @@ class RegisterScreen extends StatelessWidget {
 
     try {
       final response = await http.post(
-        Uri.parse(apiUrl),
+        Uri.parse(otpApiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": _userName_1.text.trim(),
-          "password": _password_1.text.trim(),
+          "email": _email.text.trim(),
         }),
       );
 
       Navigator.of(context).pop(); // Dismiss loading indicator
 
       if (response.statusCode == 200) {
-        // Registration successful
-        _showSnackBar(context, "Account created successfully!");
-        Navigator.pop(context); // Navigate back to login
-      } else if (response.statusCode == 401) {
-        // Username already exists
-        _showSnackBar(context, "Username already exists. Try a different one.");
+        // If OTP sent successfully, navigate to OTP verification page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OtpVerificationPage(
+              username: _userName_1.text.trim(),
+              email: _email.text.trim(),
+              password: _password_1.text.trim(),
+            ),
+          ),
+        );
       } else {
-        _showSnackBar(context, "Server error. Please try again later.");
+        _showSnackBar(context, "Failed to send OTP. Try again.");
       }
     } catch (error) {
-      Navigator.of(context).pop(); // Dismiss loading indicator
-      _showSnackBar(context, "An error occurred. Please try again.");
+      Navigator.of(context).pop();
+      _showSnackBar(context, "An error occurred. Check your connection.");
     }
   }
 
@@ -64,7 +70,7 @@ class RegisterScreen extends StatelessWidget {
 
   void _submitRegisterForm(BuildContext context) {
     if (formKey2.currentState!.validate()) {
-      registerFunc(context);
+      _sendOtp(context);
     }
   }
 
@@ -94,11 +100,7 @@ class RegisterScreen extends StatelessWidget {
             );
           },
         );
-        if (value != null) {
-          return Future.value(value);
-        } else {
-          return Future.value(false);
-        }
+        return Future.value(value ?? false);
       },
       child: Scaffold(
         body: SafeArea(
@@ -128,10 +130,23 @@ class RegisterScreen extends StatelessWidget {
                           controller: _userName_1,
                           hintText: "Username",
                           obscureText: false,
-                          iconName: "person_alt_circle_fill",
+                          iconName: "username",
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please enter a username';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        MyTextFormField(
+                          controller: _email,
+                          hintText: "Email",
+                          obscureText: false,
+                          iconName: "email",
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter an email';
                             }
                             return null;
                           },
@@ -173,11 +188,11 @@ class RegisterScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Already have an account?"),
+                      const Text("   Already have an account?"),
                       const SizedBox(width: 1),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context); // Navigate back to login
+                          Navigator.pop(context);
                         },
                         child: const Text(
                           "Login",

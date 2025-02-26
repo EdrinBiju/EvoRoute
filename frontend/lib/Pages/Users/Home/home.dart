@@ -229,90 +229,97 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(16.0),
         child: _isLoadingLocations || _isLoadingBusTypes
             ? Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Find Your Bus',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                ListTile(
-                    title: Text(
-                      selectedStartLocation ?? 'Select Starting Location',  // Default text when no location is selected
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    trailing: Icon(Icons.search, color: Colors.white),
-                    onTap: () => _selectLocation('start'),  // Trigger selection for starting location
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: AppPallete.gradient2, width: 1.0),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Destination Location Search Button
-                  ListTile(
-                    title: Text(
-                      selectedDestinationLocation ?? 'Select Destination Location',  // Default text when no location is selected
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    trailing: Icon(Icons.search, color: Colors.white),
-                    onTap: () => _selectLocation('destination'),  // Trigger selection for destination location
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: AppPallete.gradient2, width: 1.0),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Bus Types Checkboxes
-                  const Text(
-                    'Select Bus Types:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Column(
-                    children: busTypes.map((busType) {
-                      return CheckboxListTile(
-                        title: Text(busType),
-                        value: selectedBusTypes[busType] ?? false, // Ensure value is never null
-                        onChanged: (value) {
-                          setState(() {
-                            selectedBusTypes[busType] = value ?? false; // Use false as the default value
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const Spacer(),
-                  
-                  // Search Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
-                        backgroundColor: AppPallete.gradient1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: _searchBuses,
-                      child: const Text(
-                        "Search",
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Center(
+                      child: Text(
+                        "Let's Find Your Bus...",
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: AppPallete.whiteColor,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                    const SizedBox(height: 20),
+                    
+                    ListTile(
+                      title: Text(
+                        selectedStartLocation ?? 'Select Starting Location',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: Icon(Icons.search, color: Colors.white),
+                      onTap: () => _selectLocation('start'),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: AppPallete.gradient2, width: 1.0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    ListTile(
+                      title: Text(
+                        selectedDestinationLocation ?? 'Select Destination Location',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: Icon(Icons.search, color: Colors.white),
+                      onTap: () => _selectLocation('destination'),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: AppPallete.gradient2, width: 1.0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      'Select Bus Types:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Column(
+                      children: busTypes.map((busType) {
+                        return CheckboxListTile(
+                          title: Text(busType),
+                          value: selectedBusTypes[busType] ?? false,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedBusTypes[busType] = value ?? false;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.darkThemeGradient,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: _searchBuses,
+                        child: const Text(
+                          "Search",
+                          style: TextStyle(
+                            color: AppPallete.whiteColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
       ),
     );
