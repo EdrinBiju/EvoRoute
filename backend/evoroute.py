@@ -8,6 +8,8 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from flask import render_template
+from bson import ObjectId 
+import math
 
 app = Flask(__name__)
 
@@ -280,6 +282,121 @@ def get_types():
    bus_types = list(evodb.bus_types.find({}, {"_id": 0, "bus_type": 1}))  # Exclude _id from results
    bus_types_list = [bus_type["bus_type"] for bus_type in bus_types]  # Extract names
    return jsonify(bus_types_list)
+
+
+@app.route('/bus-location/<bus_id>')
+def bus_location(bus_id):
+    return jsonify({'latitude': 9.9312, 'longitude': 76.2673})
+
+@app.route("/coordinates", methods=["GET"])
+def get_coordinates():
+    # Get the route id from the query parameter
+    route_id = request.args.get("id")
+    if not route_id:
+        return jsonify({"error": "Missing 'id' parameter"}), 400
+
+    # Convert the string id to a MongoDB ObjectId
+    try:
+        obj_id = ObjectId(route_id)
+    except Exception:
+        return jsonify({"error": "Invalid id format"}), 400
+
+    # Retrieve the bus route document
+    route = evodb.bus_routes.find_one({"_id": obj_id})
+    if not route:
+        return jsonify({"error": "Bus route not found"}), 404
+
+    # Build the ordered list of location names:
+    # 1. Starting location
+    # 2. Stop locations (if any)
+    # 3. Destination location
+    location_names = []
+    if "starting_location" in route:
+        location_names.append(route["starting_location"])
+    if "stop_locations" in route and isinstance(route["stop_locations"], list):
+        location_names.extend(route["stop_locations"])
+    if "destination_location" in route:
+        location_names.append(route["destination_location"])
+
+    # For each location name, retrieve the coordinate from the locations collection
+    coordinates = []
+    for loc_name in location_names:
+        loc_doc = evodb.locations.find_one({"name": loc_name})
+        if not loc_doc:
+            return jsonify({"error": f"Coordinates for location '{loc_name}' not found"}), 404
+
+        coordinates.append({
+            "lat": loc_doc.get("latitude"),
+            "lng": loc_doc.get("longitude")
+        })
+
+    # Return the coordinates as a JSON list
+    return jsonify(coordinates), 200
+
+@app.route("/calculate_fare", methods=["POST"])
+def calculate_fare():
+    try:
+        # Parse JSON request body
+        data = request.get_json()
+        if not data or "id" not in data or "startingLocation" not in data:
+            return jsonify({"error": "Missing 'id' or 'startingLocation' in request body"}), 400
+
+        route_id = data["id"]
+        starting_location = data["startingLocation"]
+
+        # Convert the id to ObjectId
+        try:
+            obj_id = ObjectId(route_id)
+        except Exception:
+            return jsonify({"error": "Invalid id format"}), 400
+
+        # Retrieve the bus route
+        route = evodb.bus_routes.find_one({"_id": obj_id})
+        if not route:
+            return jsonify({"error": "Bus route not found"}), 404
+
+        # Get bus type fare details
+        bus_type = evodb.bus_types.find_one({"bus_type": route.get("bus_type")})
+        if not bus_type:
+            return jsonify({"error": "Bus type fare details not found"}), 404
+
+        min_fare = bus_type["minimum_fare"]
+        charge_per_km = bus_type["charge_per_km"]
+
+        # Build stop list (starting location → stops → destination)
+        stops = [route["starting_location"]] + route.get("stop_locations", []) + [route["destination_location"]]
+        stop_kms = [float(km) for km in route.get("stop_kms", [])] + [float(route.get("destination_km", 0))]  # Convert to float
+
+        # Convert stop_kms to cumulative distances
+        cumulative_distances = [0]  # First stop is at 0 km
+        for km in stop_kms:
+            cumulative_distances.append(cumulative_distances[-1] + km)
+
+        # Find the starting index
+        try:
+            start_index = stops.index(starting_location)
+        except ValueError:
+            return jsonify({"error": "Starting location not found in the route"}), 404
+
+        # Calculate fare from the user-selected starting location
+        starting_distance = cumulative_distances[start_index]
+        fare_list = []
+
+        for i in range(start_index, len(stops)):
+            distance = cumulative_distances[i] - starting_distance
+            fare = min_fare + (charge_per_km * max(distance - 1, 0))
+            rounded_fare = math.ceil(fare)  # Round up
+
+            fare_list.append({
+                "stop": stops[i],
+                "distance": round(distance, 2),
+                "fare": rounded_fare  # Ensure fare is always rounded up
+            })
+
+        return jsonify(fare_list), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/allbuses',methods=['POST'])
 def all_busses(): 

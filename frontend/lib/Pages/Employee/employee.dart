@@ -9,11 +9,23 @@ class EmployeePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Employee Page'),
+        centerTitle: true,
+        elevation: 8,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.badge, color: Colors.white, size: 26), // Team/employee icon
+            SizedBox(width: 8),
+            Text(
+              'Staff Management',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            ),
+          ],
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: AppTheme.darkThemeGradient,
-            
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
           ),
         ),
       ),

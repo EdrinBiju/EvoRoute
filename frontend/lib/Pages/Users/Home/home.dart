@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => FindBusPage(buses: buses),
+              builder: (context) => FindBusPage(buses: buses, userStartingLocation: selectedStartLocation ?? ''),
             ),
           );
         } else {

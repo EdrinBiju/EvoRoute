@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
-import 'package:frontend/Pages/Users/Buses/bus.dart';
+import 'package:frontend/Pages/Users/Buses/bus_details.dart';
 import 'package:intl/intl.dart';
 
 class FindBusPage extends StatelessWidget {
   final List<dynamic> buses;
-
-  const FindBusPage({super.key, required this.buses});
+  final String userStartingLocation;
+  const FindBusPage({super.key, required this.buses, required this.userStartingLocation});
 
   String _formatTime(String rawTime) {
     try {
@@ -25,10 +25,23 @@ class FindBusPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Available Buses'),
+        centerTitle: true,
+        elevation: 8,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.directions_bus, color: Colors.white, size: 26), // Best icon for available buses
+            SizedBox(width: 8),
+            Text(
+              'Available Buses',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            ),
+          ],
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: AppTheme.darkThemeGradient,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)), // Stylish rounded bottom
           ),
         ),
       ),
@@ -58,7 +71,7 @@ class FindBusPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BusPage(bus: bus),
+                          builder: (context) => BusPage(bus: bus, userStartingLocation: userStartingLocation,),
                         ),
                       );
                     },

@@ -219,11 +219,23 @@ class _AddBusPageState extends State<AddBusPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Bus'),
-        backgroundColor: AppPallete.gradient1,
+        centerTitle: true,
+        elevation: 8, // Adds depth
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.directions_bus_filled, color: Colors.white, size: 26), // Bus icon
+            SizedBox(width: 8),
+            Text(
+              'New Route Entry',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            ),
+          ],
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: AppTheme.darkThemeGradient,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)), // Rounded bottom
           ),
         ),
       ),
