@@ -284,9 +284,21 @@ def get_types():
    return jsonify(bus_types_list)
 
 
-@app.route('/bus-location/<bus_id>')
-def bus_location(bus_id):
-    return jsonify({'latitude': 9.9312, 'longitude': 76.2673})
+@app.route('/bus-location/<bus_no>', methods=['GET'])
+def bus_location(bus_no):
+    try:
+        # Find the bus by busno
+        bus = evodb.bus.find_one({"bus_no": bus_no}, {"latitude": 1, "longitude": 1})
+        if not bus:
+            return jsonify({"error": "Bus not found"}), 404
+
+        return jsonify({
+            "latitude": bus.get("latitude"),
+            "longitude": bus.get("longitude")
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  
 
 @app.route("/coordinates", methods=["GET"])
 def get_coordinates():
@@ -398,9 +410,51 @@ def calculate_fare():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/upload_gps', methods=['POST'])
+def upload_gps():
+    try:
+        data = request.json
+
+        # Extract data from request
+        bus_no = data.get("bus_no", "Unknown")
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
+        timestamp = data.get("timestamp", datetime.utcnow().isoformat())
+
+        if not latitude or not longitude:
+            return jsonify({"error": "Missing latitude or longitude"}), 400
+
+        # Check if bus_no already exists in DB
+        existing_entry = evodb.bus.find_one({"bus_no": bus_no})
+
+        if existing_entry:
+            # Update existing entry
+            evodb.bus.update_one(
+                {"bus_no": bus_no},
+                {"$set": {
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "timestamp": timestamp
+                }}
+            )
+            return jsonify({"success": True, "message": "GPS Data Updated!"}), 200
+        else:
+            # Insert new entry
+            gps_entry = {
+                "bus_no": bus_no,
+                "latitude": latitude,
+                "longitude": longitude,
+                "timestamp": timestamp
+            }
+            evodb.bus.insert_one(gps_entry)
+            return jsonify({"success": True, "message": "New Bus Data Added!"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/allbuses',methods=['POST'])
 def all_busses(): 
    pass
 
 if __name__ == '__main__':
-   app.run(debug=True, use_reloader=True) 
+   app.run(host='0.0.0.0',port=5000,debug=True, use_reloader=True) 

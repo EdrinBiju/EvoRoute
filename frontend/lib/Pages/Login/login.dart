@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login(BuildContext context) async {
-    const String apiUrl = "http://$IP:$PORT/login"; // Update with your local IP or emulator IP
+    const String apiUrl = "$url/login"; // Update with your local IP or emulator IP
 
     // Show loading indicator
     showDialog(

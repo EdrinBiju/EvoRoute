@@ -25,8 +25,8 @@ class _OTPVerificationScreenState extends State<OtpVerificationPage> {
   bool _isLoading = false;
 
   Future<void> verifyOTP(BuildContext context) async {
-    const String verifyOtpUrl = "http://$IP:$PORT/verify-otp";
-    const String registerUrl = "http://$IP:$PORT/register";
+    const String verifyOtpUrl = "$url/verify-otp";
+    const String registerUrl = "$url/register";
 
     setState(() => _isLoading = true);
 

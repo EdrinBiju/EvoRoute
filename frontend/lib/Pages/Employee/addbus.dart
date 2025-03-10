@@ -57,7 +57,7 @@ class _AddBusPageState extends State<AddBusPage> {
   // Fetch locations from API
   Future<void> _fetchLocations() async {
     try {
-      final response = await http.get(Uri.parse('http://$IP:$PORT/locations'));
+      final response = await http.get(Uri.parse('$url/locations'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body); 
         // Assuming the response is something like ["Aanakkampoyil", "Angamaly", ...]
@@ -98,7 +98,7 @@ class _AddBusPageState extends State<AddBusPage> {
   // Fetch bus types from API
   Future<void> _fetchBusTypes() async {
     try {
-      final response = await http.get(Uri.parse('http://$IP:$PORT/bus_types'));
+      final response = await http.get(Uri.parse('$url/bus_types'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data is List) {
@@ -147,7 +147,7 @@ class _AddBusPageState extends State<AddBusPage> {
     }
 
     final response = await http.post(
-      Uri.parse('http://$IP:$PORT/addbus'),
+      Uri.parse('$url/addbus'),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },

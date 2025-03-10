@@ -17,7 +17,7 @@ class RegisterScreen extends StatelessWidget {
   final GlobalKey<FormState> formKey2 = GlobalKey<FormState>();
 
   Future<void> _sendOtp(BuildContext context) async {
-    const String otpApiUrl = "http://$IP:$PORT/send-otp";
+    const String otpApiUrl = "$url/send-otp";
 
     showDialog(
       context: context,

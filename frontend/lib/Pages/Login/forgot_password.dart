@@ -38,7 +38,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => _isLoading = true);
     try {
       final response = await http.post(
-        Uri.parse("http://$IP:$PORT/forgot_password"),
+        Uri.parse("$url/forgot_password"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"username": usernameController.text.trim()}),
       );
@@ -64,7 +64,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => _isLoading = true);
     try {
       final response = await http.post(
-        Uri.parse("http://$IP:$PORT/verify-otp"),
+        Uri.parse("$url/verify-otp"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": usernameController.text.trim(),
@@ -97,7 +97,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => _isLoading = true);
     try {
       final response = await http.post(
-        Uri.parse("http://$IP:$PORT/reset-password"),
+        Uri.parse("$url/reset-password"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": usernameController.text.trim(),

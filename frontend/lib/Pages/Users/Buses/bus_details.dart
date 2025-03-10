@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:frontend/core/theme/app_pallete.dart';
 
 class BusPage extends StatefulWidget {
   final dynamic bus;
@@ -66,7 +67,7 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
   Future<void> _fetchBusLocation() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://$IP:$PORT/bus-location/${widget.bus["bus_no"]}'));
+          '$url/bus-location/${widget.bus["bus_no"]}'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (!mounted) return;
@@ -130,7 +131,7 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
   Future<void> _fetchRoute() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://$IP:$PORT/coordinates?id=${widget.bus["_id"]}'));
+          '$url/coordinates?id=${widget.bus["_id"]}'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         // Assume data is a list of objects with "lat" and "lng" keys.
@@ -306,11 +307,11 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
 
   Future<void> _fetchFares() async {
     final routeId = widget.bus['_id'];
-    final url = Uri.parse('http://$IP:$PORT/calculate_fare');
+    final urls = Uri.parse('$url/calculate_fare');
     
     try {
       final response = await http.post(
-        url,
+        urls,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'id': routeId, 'startingLocation': widget.userStartingLocation}),
       );
@@ -470,7 +471,7 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
           height: 30,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? Color(0xFF76FF03) : const Color.fromARGB(255, 233, 77, 66),
+            color: isSelected ? AppPallete.gradient3 : const Color.fromARGB(255, 233, 77, 66), //Color(0xFF76FF03)
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(letter,

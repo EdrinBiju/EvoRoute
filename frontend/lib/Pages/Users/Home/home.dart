@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
   // Fetch locations from API
   Future<void> _fetchLocations() async {
     try {
-      final response = await http.get(Uri.parse('http://$IP:$PORT/locations'));
+      final response = await http.get(Uri.parse('$url/locations'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body); 
         // Assuming the response is something like ["Aanakkampoyil", "Angamaly", ...]
@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
   // Fetch bus types from API
   Future<void> _fetchBusTypes() async {
     try {
-      final response = await http.get(Uri.parse('http://$IP:$PORT/bus_types'));
+      final response = await http.get(Uri.parse('$url/bus_types'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data is List) {
@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // Send POST request to Flask API
       final response = await http.post(
-        Uri.parse('http://$IP:$PORT/findbus'),
+        Uri.parse('$url/findbus'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(data),
       );
