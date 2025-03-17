@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/Pages/Admin/admin.dart';
-import 'package:frontend/Pages/Employee/addbus.dart';
+import 'package:frontend/Pages/Employee/Add/addroute.dart';
+import 'package:frontend/Pages/Employee/Delete/deleteroute.dart';
+import 'package:frontend/Pages/Employee/Update/listroute.dart';
 import 'package:frontend/Pages/Employee/employee.dart';
 import 'package:frontend/Pages/Login/forgot_password.dart';
 import 'package:frontend/Pages/Login/login.dart';
@@ -37,7 +39,9 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/admin': (context) => AdminPage(),
         '/employee': (context) => EmployeePage(),
-        '/addBus': (context) => AddBusPage(),
+        '/addRoute': (context) => AddRoutePage(),
+        '/deleteRoute': (context) => DeleteRoutePage(),
+        '/updateRoute': (context) => ListRoutePage(),
         '/forgot_password': (context) => ForgotPasswordPage(),
       },
     );

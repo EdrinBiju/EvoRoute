@@ -5,14 +5,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:frontend/core/constants/constant.dart';
 
-class AddBusPage extends StatefulWidget {
-  const AddBusPage({super.key});
+class AddRoutePage extends StatefulWidget {
+  const AddRoutePage({super.key});
 
   @override
-  _AddBusPageState createState() => _AddBusPageState();
+  _AddRoutePageState createState() => _AddRoutePageState();
 }
 
-class _AddBusPageState extends State<AddBusPage> {
+class _AddRoutePageState extends State<AddRoutePage> {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers for Bus Number, Start Time and Reach Time
@@ -127,7 +127,7 @@ class _AddBusPageState extends State<AddBusPage> {
   }
 
   // Function to add a bus
-  Future<void> _addBus() async {
+  Future<void> _addRoute() async {
     // Validate that all required fields are filled.
     if (_busNumberController.text.isEmpty ||
         startingLocation == null ||
@@ -147,7 +147,7 @@ class _AddBusPageState extends State<AddBusPage> {
     }
 
     final response = await http.post(
-      Uri.parse('$url/addbus'),
+      Uri.parse('$url/addroute'),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
@@ -167,11 +167,11 @@ class _AddBusPageState extends State<AddBusPage> {
 
     if (response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Bus added successfully')));
+          SnackBar(content: Text('Route added successfully')));
       Navigator.pushNamed(context, '/employee');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add bus')));
+          SnackBar(content: Text('Failed to add route')));
     }
   }
 
@@ -224,7 +224,7 @@ class _AddBusPageState extends State<AddBusPage> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.directions_bus_filled, color: Colors.white, size: 26), // Bus icon
+            Icon(Icons.add_road, color: Colors.white, size: 26), // Bus icon
             SizedBox(width: 8),
             Text(
               'New Route Entry',
@@ -247,6 +247,7 @@ class _AddBusPageState extends State<AddBusPage> {
                 key: _formKey,
                 child: ListView(
                   children: [
+                    SizedBox(height: 6),
                     // Bus Number field
                     TextFormField(
                       controller: _busNumberController,
@@ -698,7 +699,7 @@ class _AddBusPageState extends State<AddBusPage> {
                       child: ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState?.validate() ?? false) {
-                            _addBus();
+                            _addRoute();
                           }
                         },
                         style: ElevatedButton.styleFrom(

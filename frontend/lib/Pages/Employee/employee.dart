@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/theme/app_pallete.dart';
 import 'package:frontend/core/theme/theme.dart';
 
 class EmployeePage extends StatelessWidget {
@@ -14,7 +13,7 @@ class EmployeePage extends StatelessWidget {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.badge, color: Colors.white, size: 26), // Team/employee icon
+            Icon(Icons.badge, color: Colors.white, size: 26),
             SizedBox(width: 8),
             Text(
               'Staff Management',
@@ -23,75 +22,84 @@ class EmployeePage extends StatelessWidget {
           ],
         ),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: AppTheme.darkThemeGradient,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
           ),
         ),
       ),
-      backgroundColor: AppPallete.backgroundColor,
+      backgroundColor: Colors.black87,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Two buttons per row
-            crossAxisSpacing: 16.0,
-            mainAxisSpacing: 16.0,
-            childAspectRatio: 1.0, // Ensures square buttons
-          ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+        child: Column(
           children: [
-            // Add Bus Button
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/addBus'); // Redirect to Add Bus page
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppPallete.gradient1, AppPallete.gradient2],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.add, size: 48, color: AppPallete.whiteColor),
-                    SizedBox(height: 8),
-                    Text(
-                      'Add Bus',
-                      style: AppPallete.whiteText,
-                    ),
-                  ],
-                ),
-              ),
+            _buildCardButton(
+              context,
+              title: 'Add Route',
+              subtitle: 'Register a new route to the system',
+              icon: Icons.add_circle_outline,
+              color: Colors.greenAccent,
+              onTap: () => Navigator.pushNamed(context, '/addRoute'),
             ),
-
-            // Delete Bus Button
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/deleteBus'); // Redirect to Delete Bus page
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppPallete.errorColor,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.delete, size: 48, color: AppPallete.whiteColor),
-                    SizedBox(height: 8),
-                    Text(
-                      'Delete Bus',
-                      style: AppPallete.whiteText,
-                    ),
-                  ],
-                ),
-              ),
+            SizedBox(height: 16),
+            _buildCardButton(
+              context,
+              title: 'Delete Route',
+              subtitle: 'Remove an existing route record',
+              icon: Icons.delete_outline,
+              color: Colors.redAccent,
+              onTap: () => Navigator.pushNamed(context, '/deleteRoute'),
+            ),
+            SizedBox(height: 16),
+            _buildCardButton(
+              context,
+              title: 'Update Route',
+              subtitle: 'Modify an existing route',
+              icon: Icons.update,
+              color: Colors.blueAccent,
+              onTap: () => Navigator.pushNamed(context, '/updateRoute'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardButton(BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Card(
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: Colors.grey[900],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: color.withOpacity(0.2),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 4),
+                    Text(subtitle, style: TextStyle(color: Colors.grey, fontSize: 14)),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
+            ],
+          ),
         ),
       ),
     );

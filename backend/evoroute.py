@@ -194,7 +194,7 @@ def reset_password():
     evodb.user.update_one({"username": username}, {"$set": {"password": new_password}})
     return jsonify({"message": "Password reset successful"}), 200
 
-@app.route('/addbus', methods=['POST'])
+@app.route('/addroute', methods=['POST'])
 def add_bus():
    # Get data from the request
    payload = request.get_json()
@@ -225,6 +225,55 @@ def add_bus():
       return jsonify({"message": "Bus added successfully", "bus_id": str(result.inserted_id)}), 201
    except Exception as e:
       return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+   
+@app.route('/updateroute', methods=['PUT'])
+def update_route():
+    try:
+        # Get request payload
+        payload = request.get_json()
+        route_id = payload.get("id")
+
+        # Validate route_id
+        if not route_id:
+            return jsonify({'error': 'route_id is required'}), 400
+
+        try:
+            obj_id = ObjectId(route_id)
+        except Exception:
+            return jsonify({"error": "Invalid route_id format"}), 400
+
+        # Validate required fields
+        required_fields = ['bus_number', 'starting_location', 'destination_location', 'stop_locations', 'start_time', 'bus_type']
+        for field in required_fields:
+            if field not in payload:
+                return jsonify({'error': f'{field} is required'}), 400
+
+        # Prepare update data
+        update_data = {
+            "bus_no": payload["bus_number"],
+            "starting_location": payload["starting_location"],
+            "destination_location": payload["destination_location"],
+            "destination_km": payload["destination_km"],
+            "stop_locations": payload["stop_locations"],
+            "stop_kms": payload["stop_kms"],
+            "start_time": ist.localize(datetime.combine(date.today(), datetime.strptime(payload["start_time"], "%I:%M %p").time())),
+            "reach_time": ist.localize(datetime.combine(date.today(), datetime.strptime(payload["reach_time"], "%I:%M %p").time())),
+            "bus_type": payload["bus_type"],
+            "days": payload["days"],
+        }
+
+        # Update the document
+        result = evodb.bus_routes.update_one({"_id": obj_id}, {"$set": update_data})
+
+        if result.matched_count == 0:
+            return jsonify({"error": "Route not found"}), 404
+        elif result.modified_count == 0:
+            return jsonify({"message": "No changes found"}), 201
+        else:
+            return jsonify({"message": "Route updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 @app.route('/findbus', methods=['POST'])
 def find_bus():
@@ -452,9 +501,36 @@ def upload_gps():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/allbuses',methods=['POST'])
+@app.route('/allbuses',methods=['GET'])
 def all_busses(): 
-   pass
+   all_routes=list(evodb.bus_routes.find({}))
+   for bus in all_routes:
+      bus['_id'] = str(bus['_id'])
+   return jsonify({"data":all_routes}),200
+
+@app.route('/deleteroute', methods=['POST'])
+def delete_route():
+    try:
+        data = request.json
+        routeid = data.get("id")
+
+        if not routeid:
+            return jsonify({"message": "RouteId 'id' is required"}), 400
+
+        try:
+            obj_id = ObjectId(routeid)
+        except Exception:
+            return jsonify({"message": "Invalid RouteId format"}), 400
+
+        result = evodb.bus_routes.delete_one({"_id": obj_id})
+
+        if result.deleted_count > 0:
+            return jsonify({"message": "Route deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Route not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0',port=5000,debug=True, use_reloader=True) 
