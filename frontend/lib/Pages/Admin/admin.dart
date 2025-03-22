@@ -1,15 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/theme.dart';
 
-class AdminPage extends StatelessWidget {
+class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
+
+  @override
+  State<AdminPage> createState() => _AdminPageState();
+}
+
+class _AdminPageState extends State<AdminPage> {
+  String? id; 
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Retrieve the passed arguments
+    final arguments = ModalRoute.of(context)?.settings.arguments as Map?;
+    setState(() {
+      id = arguments?['id'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        elevation: 8, // Adds depth
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: AppTheme.darkThemeGradient, // Applying theme gradient
+          ),
+        ),
+        elevation: 5, // Adds subtle depth
+        shadowColor: Colors.black.withOpacity(0.3),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(15), // Smooth bottom edges
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.home, color: Colors.white),
+          tooltip: 'Home',
+          onPressed: () {
+            Navigator.pushNamed(context, '/admin'); // Navigate to Home
+          },
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -19,14 +54,50 @@ class AdminPage extends StatelessWidget {
               'Admin Dashboard',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.2),
             ),
-          ],
+          ]
         ),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.darkThemeGradient,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+        centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (String choice) {
+              if (choice == 'Settings') {
+                Navigator.pushNamed(
+                  context, 
+                  '/settings', 
+                  arguments: {
+                    'id': id,
+                  },
+                );
+              } else if (choice == 'Logout') {
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'Settings',
+                  child: Center(
+                    child: Text(
+                      'Settings',
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    ),
+                  ),
+                ),
+                // const PopupMenuDivider(),
+                const PopupMenuItem<String>(
+                  value: 'Logout',
+                  child: Center(
+                    child: Text(
+                      'Logout',
+                      style: TextStyle(fontSize: 14, color: Colors.redAccent),
+                    ),
+                  ),
+                ),
+              ];
+            },
           ),
-        ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

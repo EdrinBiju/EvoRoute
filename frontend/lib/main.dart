@@ -14,6 +14,9 @@ import 'package:frontend/Pages/Login/forgot_password.dart';
 import 'package:frontend/Pages/Login/login.dart';
 import 'package:frontend/Pages/Register/register.dart';
 import 'package:frontend/Pages/Users/Home/home.dart';
+import 'package:frontend/Pages/Settings/about.dart';
+import 'package:frontend/Pages/Settings/changepassword.dart';
+import 'package:frontend/Pages/Settings/settings.dart';
 import 'package:frontend/core/theme/theme_notifier.dart';
 import 'package:provider/provider.dart';
 
@@ -55,6 +58,9 @@ class MyApp extends StatelessWidget {
         '/updateLocation': (context) => UpdateLocationPage(),
         '/deleteLocation': (context) => DeleteLocationPage(),
         '/addStaff': (context) => AddStaffPage(),
+        '/settings': (context) => SettingsPage(),
+        '/changePassword': (context) => ChangePasswordPage(),
+        '/about': (context) => AboutPage(),
         
       },
     );

@@ -55,13 +55,13 @@ class _LoginScreenState extends State<LoginScreen> {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           if (data['type'] == 'admin') {
-            Navigator.pushNamed(context, '/admin');
+            Navigator.pushNamed(context, '/admin', arguments: {'id': data['id'],},);
           }
           else if (data['type'] == 'employee') {
-            Navigator.pushNamed(context, '/employee');
+            Navigator.pushNamed(context, '/employee',arguments: {'id': data['id'],},);
           }
           else {
-            Navigator.pushNamed(context, '/home');
+            Navigator.pushNamed(context, '/home', arguments: {'id': data['id'],},);
           }
         } else {
           _showSnackBar(context, data['message'] ?? "Login failed");

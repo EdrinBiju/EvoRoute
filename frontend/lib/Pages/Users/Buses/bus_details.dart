@@ -327,46 +327,79 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
     }
   }
 
-  /// Calculates expected arrival times using bus data
   void _calculateArrivalTimes() {
-  try {
-    List<String> stopLocations = List<String>.from(widget.bus['stop_locations']);
-    List<String> stopKmsStr = List<String>.from(widget.bus['stop_kms']);
-    List<double> stopDistances = stopKmsStr.map((s) => double.parse(s)).toList();
+    try {
+      List<String> stopLocations = List<String>.from(widget.bus['stop_locations']);
+      List<String> stopKmsStr = List<String>.from(widget.bus['stop_kms']);
+      List<double> stopDistances = stopKmsStr.map((s) => double.parse(s)).toList();
 
-    // Convert start time from GMT to IST
-    DateTime startTime = DateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'").parse(widget.bus['start_time'], true);
-    startTime = startTime.add(Duration(hours: 5, minutes: 30));
+      // Convert start time from GMT to IST
+      DateTime startTime = DateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'").parse(widget.bus['start_time'], true);
+      startTime = startTime.add(Duration(hours: 5, minutes: 30));
 
-    Map<String, String> tempArrivalTimes = {};
+      Map<String, String> tempArrivalTimes = {};
+      String busType = widget.bus['bus_type'];
+      double averageSpeed = _getBusSpeed(busType);
 
-    // Store first stop (starting location) with formatted time
-    tempArrivalTimes[widget.bus['starting_location']] = DateFormat('hh:mm a').format(startTime);
+      const int stopDelayMinutes = 2; // Delay at each stop for entry/exit
 
-    // Process stop locations
-    for (int i = 0; i < stopLocations.length; i++) {
-      double distance = stopDistances[i];
-      int travelTime = (distance / averageSpeed * 60).toInt(); // Convert to minutes
-      startTime = startTime.add(Duration(minutes: travelTime));
+      // Store first stop (starting location) with formatted time
+      tempArrivalTimes[widget.bus['starting_location']] = DateFormat('hh:mm a').format(startTime);
 
-      tempArrivalTimes[stopLocations[i]] = DateFormat('hh:mm a').format(startTime);
+      // Process stop locations
+      for (int i = 0; i < stopLocations.length; i++) {
+        double distance = stopDistances[i];
+        int travelTime = (distance / averageSpeed * 60).toInt(); // Convert to minutes
+        startTime = startTime.add(Duration(minutes: travelTime + stopDelayMinutes)); // Add stop delay
+
+        tempArrivalTimes[stopLocations[i]] = DateFormat('hh:mm a').format(startTime);
+      }
+
+      // Add final destination arrival time
+      double finalDistance = double.parse(widget.bus['destination_km']);
+      int finalTravelTime = (finalDistance / averageSpeed * 60).toInt();
+      startTime = startTime.add(Duration(minutes: finalTravelTime));
+
+      tempArrivalTimes[widget.bus['destination_location']] = DateFormat('hh:mm a').format(startTime);
+
+      setState(() {
+        arrivalTimes = tempArrivalTimes;
+      });
+    } catch (e) {
+      print('Error calculating arrival times: $e');
     }
-
-    // Add final destination arrival time
-    double finalDistance = double.parse(widget.bus['destination_km']);
-    int finalTravelTime = (finalDistance / averageSpeed * 60).toInt();
-    startTime = startTime.add(Duration(minutes: finalTravelTime));
-
-    tempArrivalTimes[widget.bus['destination_location']] = DateFormat('hh:mm a').format(startTime);
-
-    setState(() {
-      arrivalTimes = tempArrivalTimes;
-    });
-  } catch (e) {
-    print('Error calculating arrival times: $e');
   }
-}
 
+  double _getBusSpeed(String busType) {
+    switch (busType) {
+      case "City/Ordinary":
+        return 40.0;
+      case "Fast Passenger/LSFP":
+        return 50.0;
+      case "Express/Super Express":
+        return 55.0;
+      case "Super Deluxe/Semi Sleeper":
+        return 60.0;
+      case "Multi Axle Volvo":
+        return 80.0;
+      case "Low Floor Non A/C":
+        return 38.0;
+      case "Super Air Express":
+        return 65.0;
+      case "Luxury/Hi-Tech/Ac":
+        return 70.0;
+      case "Single Axle Volvo":
+        return 75.0;
+      case "Super Fast Passenger":
+        return 58.0;
+      case "Low Floor A/C":
+        return 42.0;
+      case "City Fast":
+        return 45.0;
+      default:
+        return 50.0; 
+    }
+  }
 
   /// Builds route display with stops, fares, and arrival times
   Widget _buildRouteColumn({required String start, required List<String> stops, required String destination}) {

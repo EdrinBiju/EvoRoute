@@ -86,7 +86,7 @@ def login():
     evodb.user.update_one({'username': username}, {'$set': {'last_login': datetime.utcnow()}})
     user = clean_user_data(user)
         
-    return jsonify({'type': user['type'], 'success': True}), 200
+    return jsonify({'id':user['_id'],'type': user['type'], 'success': True}), 200
 
 # API to send OTP (for registration and forgot password)
 @app.route('/send-otp', methods=['POST'])
@@ -453,7 +453,8 @@ def calculate_fare():
 
         for i in range(start_index, len(stops)):
             distance = cumulative_distances[i] - starting_distance
-            fare = min_fare + (charge_per_km * max(distance - 1, 0))
+            print(distance)
+            fare = min_fare + (charge_per_km * max(distance - 2.5, 0))
             rounded_fare = math.ceil(fare)  # Round up
 
             fare_list.append({
@@ -744,6 +745,74 @@ def add_staff():
         result = evodb.user.insert_one(staff_data)
 
         return jsonify({"message": "Staff added successfully", "staff_id": str(result.inserted_id)}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/userdetails/<id>', methods=['GET'])
+def get_user(id):
+    try:
+        # Convert id to ObjectId
+        user = evodb.user.find_one({"_id": ObjectId(id)})
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Remove sensitive data if necessary (e.g., password)
+        user["_id"] = str(user["_id"])  # Convert ObjectId to string
+        user.pop("password", None)  # Exclude password field
+
+        return jsonify(user), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/changepassword', methods=['POST'])
+def change_password():
+    try:
+        data = request.get_json()
+        user_id = data.get("id")
+        old_password = data.get("old_password")
+        new_password = data.get("new_password")
+
+        if not user_id or not old_password or not new_password:
+            return jsonify({"error": "All fields (id, old_password, new_password) are required"}), 400
+
+        # Find user by ID
+        user = evodb.user.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Check if old password matches
+        if user.get("password") != old_password:
+            return jsonify({"error": "Old password is incorrect"}), 401
+
+        # Update password
+        evodb.user.update_one({"_id": ObjectId(user_id)}, {"$set": {"password": new_password}})
+
+        return jsonify({"message": "Password changed successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/deleteaccount', methods=['DELETE'])
+def delete_account():
+    try:
+        data = request.get_json()
+        user_id = data.get("id")
+
+        if not user_id:
+            return jsonify({"error": "User ID is required"}), 400
+
+        # Check if the user exists
+        user = evodb.user.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Delete the user
+        evodb.user.delete_one({"_id": ObjectId(user_id)})
+
+        return jsonify({"message": "Account deleted successfully"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
