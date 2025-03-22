@@ -17,7 +17,7 @@ class ListRoutePage extends StatefulWidget {
 class _ListRoutePageState extends State<ListRoutePage> {
   List<dynamic> busRoutes = [];
   bool isLoading = true;
-  final String apiUrl = "$url/allbuses"; // API endpoint
+  final String apiUrl = "$url/allroutes"; // API endpoint
 
   @override
   void initState() {

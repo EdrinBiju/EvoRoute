@@ -122,7 +122,7 @@ class FindBusPage extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  'Type: $type',
+                                  '$type',
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                         color: Colors.blueAccent,
                                       ),

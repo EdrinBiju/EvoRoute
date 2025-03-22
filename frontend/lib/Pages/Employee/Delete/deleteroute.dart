@@ -24,7 +24,7 @@ class _DeleteRoutePageState extends State<DeleteRoutePage> {
 
   Future<void> _fetchBuses() async {
     try {
-      final response = await http.get(Uri.parse("$url/allbuses"));
+      final response = await http.get(Uri.parse("$url/allroutes"));
       if (response.statusCode == 200) {
         setState(() {
           busRoutes = jsonDecode(response.body)['data']; // Extracting data array

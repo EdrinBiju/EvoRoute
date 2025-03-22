@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/Pages/Admin/addlocation.dart';
 import 'package:frontend/Pages/Admin/admin.dart';
+import 'package:frontend/Pages/Admin/viewallstaffs.dart';
+import 'package:frontend/Pages/Admin/viewallusers.dart';
 import 'package:frontend/Pages/Employee/Add/addroute.dart';
 import 'package:frontend/Pages/Employee/Delete/deleteroute.dart';
 import 'package:frontend/Pages/Employee/Update/listroute.dart';
@@ -36,13 +39,17 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
+        '/forgot_password': (context) => ForgotPasswordPage(),
         '/home': (context) => HomePage(),
         '/admin': (context) => AdminPage(),
         '/employee': (context) => EmployeePage(),
         '/addRoute': (context) => AddRoutePage(),
         '/deleteRoute': (context) => DeleteRoutePage(),
         '/updateRoute': (context) => ListRoutePage(),
-        '/forgot_password': (context) => ForgotPasswordPage(),
+        '/viewUsers': (context) => ViewAllUsersPage(),
+        '/viewStaffs': (context) => ViewAllStaffsPage(),
+        '/addLocation': (context) => AddLocationPage(),
+        
       },
     );
   }
