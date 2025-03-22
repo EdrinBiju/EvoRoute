@@ -39,8 +39,8 @@ class _AddLocationPageState extends State<AddLocationPage> {
       Uri.parse('$url/addlocation'),
       body: jsonEncode({
         'name': _locationController.text,
-        'latitude': _selectedLocation!.latitude,
-        'longitude': _selectedLocation!.longitude,
+        'latitude': double.parse(_selectedLocation!.latitude.toStringAsFixed(10)),
+        'longitude': double.parse(_selectedLocation!.longitude.toStringAsFixed(10)),
       }),
       headers: {'Content-Type': 'application/json'},
     );

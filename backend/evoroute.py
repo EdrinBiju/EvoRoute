@@ -327,6 +327,13 @@ def get_locations():
    location_list = [location["name"] for location in locations]  # Extract names
    return jsonify(location_list)
 
+@app.route('/alllocations',methods=['GET'])
+def all_locations(): 
+   locations = list(evodb.locations.find({}))  
+   for location in locations:
+      location['_id'] = str(location['_id'])
+   return jsonify(locations)
+
 @app.route('/bus_types',methods=['GET'])
 def get_types(): 
    bus_types = list(evodb.bus_types.find({}, {"_id": 0, "bus_type": 1}))  # Exclude _id from results
@@ -571,35 +578,6 @@ def get_all_staffs():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route('/addstaff', methods=['POST'])
-def add_staff():
-    try:
-        data = request.get_json()
-        username = data.get("username")
-        password = data.get("password")
-        email = data.get("email")
-
-        if not username or not password or not email:
-            return jsonify({"error": "Username, password, and email are required"}), 400
-
-        # Check if the username or email already exists
-        existing_user = evodb.user.find_one({"$or": [{"username": username}, {"email": email}]})
-        if existing_user:
-            return jsonify({"error": "Username or email already exists"}), 409
-
-        # Insert the new staff member
-        staff_data = {
-            "username": username,
-            "password": password,  # Consider hashing the password before storing
-            "email": email,
-            "type": "employee"
-        }
-
-        result = evodb.user.insert_one(staff_data)
-        return jsonify({"message": "Staff added successfully", "staff_id": str(result.inserted_id)}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
 @app.route('/addlocation', methods=['POST'])
 def add_location():
     try:
@@ -627,7 +605,7 @@ def add_location():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route('/updatelocation', methods=['POST'])
+@app.route('/updatelocation', methods=['PUT'])
 def update_location():
     try:
         data = request.get_json()
@@ -654,11 +632,9 @@ def update_location():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route('/deletelocation', methods=['POST'])
-def delete_location():
+@app.route('/deletelocation/<location_id>', methods=['DELETE'])
+def delete_location(location_id):
     try:
-        data = request.get_json()
-        location_id = data.get("id")
 
         if not location_id:
             return jsonify({"error": "Location ID is required"}), 400
@@ -736,6 +712,38 @@ def get_all_buses():
             bus["_id"] = str(bus["_id"])
 
         return jsonify(buses), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/addstaff', methods=['POST'])
+def add_staff():
+    try:
+        data = request.get_json()
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password", "Abc@123") 
+
+        if not username or not email:
+            return jsonify({"error": "Username and email are required"}), 400
+
+        # Check if username already exists
+        if evodb.user.find_one({"username": username}):
+            return jsonify({"error": "Username already exists"}), 409
+
+        # Prepare staff data
+        staff_data = {
+            "username": username,
+            "email": email,
+            "password": password,
+            "type": "employee",
+            "last_login": datetime.utcnow()
+        }
+
+        # Insert into database
+        result = evodb.user.insert_one(staff_data)
+
+        return jsonify({"message": "Staff added successfully", "staff_id": str(result.inserted_id)}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

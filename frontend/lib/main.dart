@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/Pages/Admin/addlocation.dart';
+import 'package:frontend/Pages/Admin/AddLocation/addlocation.dart';
+import 'package:frontend/Pages/Admin/AddStaff/addstaff.dart';
+import 'package:frontend/Pages/Admin/DeleteLocation/deletelocation.dart';
+import 'package:frontend/Pages/Admin/UpdateLocation/updatelocation.dart';
 import 'package:frontend/Pages/Admin/admin.dart';
-import 'package:frontend/Pages/Admin/viewallstaffs.dart';
-import 'package:frontend/Pages/Admin/viewallusers.dart';
+import 'package:frontend/Pages/Admin/ViewStaffs/viewallstaffs.dart';
+import 'package:frontend/Pages/Admin/ViewUsers/viewallusers.dart';
 import 'package:frontend/Pages/Employee/Add/addroute.dart';
 import 'package:frontend/Pages/Employee/Delete/deleteroute.dart';
 import 'package:frontend/Pages/Employee/Update/listroute.dart';
@@ -49,6 +52,9 @@ class MyApp extends StatelessWidget {
         '/viewUsers': (context) => ViewAllUsersPage(),
         '/viewStaffs': (context) => ViewAllStaffsPage(),
         '/addLocation': (context) => AddLocationPage(),
+        '/updateLocation': (context) => UpdateLocationPage(),
+        '/deleteLocation': (context) => DeleteLocationPage(),
+        '/addStaff': (context) => AddStaffPage(),
         
       },
     );
