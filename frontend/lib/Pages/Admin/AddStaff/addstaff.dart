@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class AddStaffPage extends StatefulWidget {
+  const AddStaffPage({super.key});
+
   @override
   _AddStaffPageState createState() => _AddStaffPageState();
 }

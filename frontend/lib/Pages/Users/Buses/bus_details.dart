@@ -15,7 +15,7 @@ import 'package:frontend/core/theme/app_pallete.dart';
 class BusPage extends StatefulWidget {
   final dynamic bus;
   final String userStartingLocation;
-  BusPage({Key? key, required this.bus, required this.userStartingLocation}) : super(key: key);
+  BusPage({super.key, required this.bus, required this.userStartingLocation});
 
   @override
   _BusPageState createState() => _BusPageState();
@@ -748,11 +748,11 @@ class FullscreenMapPage extends StatefulWidget {
   final List<LatLng> routePolylinePoints;
 
   const FullscreenMapPage({
-    Key? key,
+    super.key,
     required this.busLocation,
     required this.userLocation,
     required this.routePolylinePoints,
-  }) : super(key: key);
+  });
 
   @override
   _FullscreenMapPageState createState() => _FullscreenMapPageState();

@@ -11,8 +11,8 @@ const char* password = "parayilla";
 const char* apiUrl = "http://3.80.100.134:5000/upload_gps";
 
 // Define RX and TX pins for GPS
-#define GPS_RX 12  // D5
-#define GPS_TX 14  // D6
+#define GPS_RX 12  // D6
+#define GPS_TX 14  // D5
 #define GPS_BAUD 9600
 
 // Define RX and TX pins for SIM800L

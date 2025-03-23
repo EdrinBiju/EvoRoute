@@ -41,7 +41,7 @@ class _EmployeePageState extends State<EmployeePage> {
           icon: const Icon(Icons.home, color: Colors.white),
           tooltip: 'Home',
           onPressed: () {
-            Navigator.pushNamed(context, '/employee'); // Navigate to Home
+            Navigator.pushNamed(context, '/employee', arguments: {'id': id,}); 
           },
         ),
         title: Row(

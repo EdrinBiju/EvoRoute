@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class AddLocationPage extends StatefulWidget {
+  const AddLocationPage({super.key});
+
   @override
   _AddLocationPageState createState() => _AddLocationPageState();
 }
@@ -158,6 +160,8 @@ class _AddLocationPageState extends State<AddLocationPage> {
 }
 
 class SelectLocationPage extends StatefulWidget {
+  const SelectLocationPage({super.key});
+
   @override
   _SelectLocationPageState createState() => _SelectLocationPageState();
 }

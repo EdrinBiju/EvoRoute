@@ -69,17 +69,16 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 16,
+              runSpacing: 16,
               children: [
                 _creatorCard("Anannya Ajit", "lib/assets/anannya.jpg"),
-                const SizedBox(width: 16),
                 _creatorCard("Anwesha Elna", "lib/assets/anwesha.jpg"),
-                const SizedBox(width: 16),
                 _creatorCard("Edrin Biju", "lib/assets/edrin.jpg"),
               ],
             ),
-
             const SizedBox(height: 30),
 
             // Footer

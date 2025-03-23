@@ -246,7 +246,7 @@ class _HomePageState extends State<HomePage> {
           icon: const Icon(Icons.home, color: Colors.white),
           tooltip: 'Home',
           onPressed: () {
-            Navigator.pushNamed(context, '/home'); // Navigate to Home
+            Navigator.pushNamed(context, '/home', arguments: {'id': id,});
           },
         ),
         title: const Text(

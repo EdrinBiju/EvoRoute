@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DeleteLocationPage extends StatefulWidget {
+  const DeleteLocationPage({super.key});
+
   @override
   _DeleteLocationPageState createState() => _DeleteLocationPageState();
 }

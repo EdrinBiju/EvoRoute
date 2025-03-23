@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class UpdateLocationPage extends StatefulWidget {
+  const UpdateLocationPage({super.key});
+
   @override
   _UpdateLocationPageState createState() => _UpdateLocationPageState();
 }
@@ -200,7 +202,7 @@ class FullScreenMap extends StatefulWidget {
   final LatLng initialLocation;
   final String initialName;
 
-  FullScreenMap({required this.initialLocation, required this.initialName});
+  FullScreenMap({super.key, required this.initialLocation, required this.initialName});
 
   @override
   _FullScreenMapState createState() => _FullScreenMapState();

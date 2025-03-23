@@ -42,7 +42,7 @@ class _AdminPageState extends State<AdminPage> {
           icon: const Icon(Icons.home, color: Colors.white),
           tooltip: 'Home',
           onPressed: () {
-            Navigator.pushNamed(context, '/admin'); // Navigate to Home
+            Navigator.pushNamed(context, '/admin', arguments: {'id': id,}); 
           },
         ),
         title: Row(
