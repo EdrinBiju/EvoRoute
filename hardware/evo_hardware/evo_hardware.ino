@@ -8,7 +8,7 @@ const char* ssid = "404 not found";
 const char* password = "parayilla";
 
 // API URL
-const char* apiUrl = "http://3.80.100.134:5000/upload_gps";
+const char* apiUrl = "http://54.226.79.238:5000/upload_gps";
 
 // Define RX and TX pins for GPS
 #define GPS_RX 12  // D6
@@ -180,6 +180,7 @@ void loop() {
         // If WiFi fails, use SIM800L
         sendToAPI_SIM(lat, lon, timestamp);
       }
+      delay(5000);
     }
   }
 }
