@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 30px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .header {
+            background: #007BFF;
+            color: #ffffff;
+            padding: 15px;
+            font-size: 22px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .otp-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333333;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            display: inline-block;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 2px dashed #007BFF;
+        }
+        .footer {
+            font-size: 14px;
+            color: #777777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">OTP Verification</div>
+        <p>Hello,</p>
+        <p>Your One-Time Password (OTP) is:</p>
+        <div class="otp-box">{{ otp }}</div>
+        <p>This OTP is valid for <strong>5 minutes</strong>. Please do not share it with anyone.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+        <div class="footer">© 2025 EvoRoute. All rights reserved.</div>
+    </div>
+</body>
+</html>
