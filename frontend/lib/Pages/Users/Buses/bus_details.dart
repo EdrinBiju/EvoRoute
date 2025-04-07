@@ -49,8 +49,8 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
     _fetchBusLocation();
     _fetchUserLocation();
     _fetchRoute(); // Fetch the road route from your API.
-    // Update locations every 5 seconds.
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+    // Update locations every 2 seconds.
+    _timer = Timer.periodic(Duration(seconds: 4), (timer) {
       _fetchBusLocation();
       _fetchUserLocation();
       // Optionally, refresh the route periodically.
@@ -268,8 +268,7 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
       context,
       MaterialPageRoute(
         builder: (_) => FullscreenMapPage(
-          busLocation: _busLocation,
-          userLocation: _userLocation,
+          bus: widget.bus,
           routePolylinePoints: _routePolylinePoints,
         ),
       ),
@@ -743,15 +742,13 @@ class _BusPageState extends State<BusPage> with TickerProviderStateMixin {
 }
 
 class FullscreenMapPage extends StatefulWidget {
-  final LatLng? busLocation;
-  final LatLng? userLocation;
   final List<LatLng> routePolylinePoints;
+  final dynamic bus;
 
   const FullscreenMapPage({
     super.key,
-    required this.busLocation,
-    required this.userLocation,
     required this.routePolylinePoints,
+    required this.bus
   });
 
   @override
@@ -761,6 +758,9 @@ class FullscreenMapPage extends StatefulWidget {
 class _FullscreenMapPageState extends State<FullscreenMapPage> with TickerProviderStateMixin {
   final MapController _fsMapController = MapController();
   bool _autoCenter = true;
+  Timer? _timer;
+  LatLng? busLocation;
+  LatLng? userLocation;
 
   /// Smoothly animate the map to a new center and zoom.
   void animateMapMove(LatLng destCenter, double destZoom) {
@@ -799,12 +799,12 @@ class _FullscreenMapPageState extends State<FullscreenMapPage> with TickerProvid
   }
 
   void _animateFitBounds() {
-    if (widget.busLocation == null || widget.userLocation == null) return;
+    if (busLocation == null || userLocation == null) return;
     final center = LatLng(
-      (widget.busLocation!.latitude + widget.userLocation!.latitude) / 2,
-      (widget.busLocation!.longitude + widget.userLocation!.longitude) / 2,
+      (busLocation!.latitude + userLocation!.latitude) / 2,
+      (busLocation!.longitude + userLocation!.longitude) / 2,
     );
-    final distance = Distance().as(LengthUnit.Kilometer, widget.busLocation!, widget.userLocation!);
+    final distance = Distance().as(LengthUnit.Kilometer, busLocation!, userLocation!);
     double destZoom;
     if (distance < 1) {
       destZoom = 16;
@@ -821,7 +821,7 @@ class _FullscreenMapPageState extends State<FullscreenMapPage> with TickerProvid
 
   void _fitMapToBounds() {
     if (!_autoCenter) return;
-    if (widget.busLocation == null || widget.userLocation == null) return;
+    if (busLocation == null || userLocation == null) return;
     _animateFitBounds();
   }
 
@@ -839,9 +839,84 @@ class _FullscreenMapPageState extends State<FullscreenMapPage> with TickerProvid
   @override
   void initState() {
     super.initState();
+    _fetchBusLocation();
+    _fetchUserLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fitMapToBounds();
     });
+    _timer = Timer.periodic(Duration(seconds: 4), (timer) {
+      _fetchBusLocation();
+      _fetchUserLocation();
+  });
+  
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchBusLocation() async {
+    try {
+      final response = await http.get(Uri.parse(
+          '$url/bus-location/${widget.bus["bus_no"]}'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (!mounted) return;
+        setState(() {
+          busLocation = LatLng(data['latitude'], data['longitude']);
+        });
+        _fitMapToBounds();
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to load bus location'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error fetching bus location: $e"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _fetchUserLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        permission = await Geolocator.requestPermission();
+      }
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      if (!mounted) return;
+      setState(() {
+        userLocation = LatLng(position.latitude, position.longitude);
+      });
+      _fitMapToBounds();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error fetching user location: $e"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -853,7 +928,7 @@ class _FullscreenMapPageState extends State<FullscreenMapPage> with TickerProvid
           FlutterMap(
             mapController: _fsMapController,
             options: MapOptions(
-              center: widget.busLocation ?? LatLng(0, 0),
+              center: busLocation ?? LatLng(0, 0),
               zoom: 15,
               interactiveFlags: InteractiveFlag.all,
               onPositionChanged: (MapPosition position, bool hasGesture) {
@@ -883,9 +958,9 @@ class _FullscreenMapPageState extends State<FullscreenMapPage> with TickerProvid
               ),
               MarkerLayer(
                 markers: [
-                  if (widget.busLocation != null)
+                  if (busLocation != null)
                     Marker(
-                      point: widget.busLocation!,
+                      point: busLocation!,
                       width: 30,
                       height: 30,
                       child: Container(
@@ -901,9 +976,9 @@ class _FullscreenMapPageState extends State<FullscreenMapPage> with TickerProvid
                         child: Center(child: Icon(Icons.directions_bus, color: Colors.white, size: 18)),
                       ),
                     ),
-                  if (widget.userLocation != null)
+                  if (userLocation != null)
                     Marker(
-                      point: widget.userLocation!,
+                      point: userLocation!,
                       width: 30,
                       height: 30,
                       child: Container(

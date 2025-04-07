@@ -175,12 +175,13 @@ void loop() {
       Serial.println(timestamp);
       Serial.println("");
 
+      sendToAPI_WiFi(lat, lon, timestamp);
       // First try WiFi
-      if (!sendToAPI_WiFi(lat, lon, timestamp)) {
+      // if (!sendToAPI_WiFi(lat, lon, timestamp)) {
         // If WiFi fails, use SIM800L
-        sendToAPI_SIM(lat, lon, timestamp);
-      }
-      delay(5000);
+        // sendToAPI_SIM(lat, lon, timestamp);
+      // }
+      delay(2000);
     }
   }
 }
